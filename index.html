@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="googlebot" content="noindex, nofollow">
+<title>지식그래프 보기 | 프로그래밍 오개념 피드백 시스템 전문가 검토</title>
+<style>
+  :root {
+    --ink: #1b2430; --muted: #5b6673; --line: #d9dee4; --paper: #ffffff; --wash: #f3f5f7;
+    --concept: #1f4e79; --mis: #f4d7c3; --mis-line: #b4561c; --judge: #7a3410; --focus: #2f7dd1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Segoe UI", sans-serif;
+    color: var(--ink); background: var(--paper); font-size: 15px; line-height: 1.6;
+    display: flex; flex-direction: column;
+  }
+  header { padding: 18px 24px 12px; border-bottom: 1px solid var(--line); }
+  h1 { font-size: 21px; margin: 0 0 4px; font-weight: 700; letter-spacing: -0.01em; }
+  .lede { margin: 0; color: var(--muted); max-width: 72ch; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; padding: 10px 24px; border-bottom: 1px solid var(--line); background: var(--wash); }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--paper); }
+  .seg button { border: 0; background: transparent; padding: 6px 12px; font: inherit; color: var(--ink); cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--concept); color: #fff; }
+  input[type="search"] { font: inherit; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; width: min(320px, 100%); }
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .legend { display: flex; gap: 16px; align-items: center; color: var(--muted); font-size: 13.5px; margin-left: auto; }
+  .key { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--mis); border: 1.5px solid var(--mis-line); }
+  .sw.c { border-radius: 4px; background: var(--concept); border-color: var(--concept); width: 18px; }
+  .sw.j { border: 3px solid var(--judge); }
+  main { flex: 1; display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
+  #graph { min-height: 520px; height: 100%; }
+  aside { border-left: 1px solid var(--line); padding: 18px 20px; overflow-y: auto; }
+  aside h2 { font-size: 17px; margin: 0 0 2px; }
+  aside .sub { color: var(--muted); margin: 0 0 12px; font-size: 13.5px; }
+  aside dl { margin: 0; }
+  aside dt { font-weight: 600; font-size: 13.5px; color: var(--muted); margin-top: 12px; }
+  aside dd { margin: 2px 0 0; }
+  aside ul { margin: 4px 0 0; padding-left: 0; list-style: none; }
+  aside li button { font: inherit; text-align: left; border: 0; background: none; padding: 3px 0; color: var(--concept); cursor: pointer; }
+  aside li button:hover { text-decoration: underline; }
+  .tag { display: inline-block; font-size: 12.5px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .tag.on { border-color: var(--judge); color: var(--judge); }
+  #table { display: none; padding: 16px 24px 32px; overflow: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
+  th { background: var(--wash); font-weight: 600; }
+  tr.cg td { background: #e8eef5; font-weight: 600; }
+  footer { padding: 10px 24px 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  body.tableview main { display: none; }
+  body.tableview #table { display: block; flex: 1; }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; grid-template-rows: 60vh auto; }
+    aside { border-left: 0; border-top: 1px solid var(--line); }
+    .legend { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>지식그래프 보기</h1>
+  <p class="lede">평가 문항이 재는 개념 9개와, 문항의 오답 선지가 가리키는 오개념 45개의 연결입니다. 개념이나 오개념을 누르면 오른쪽에 내용이 나옵니다. 검토지 ‘다. 시스템’의 A1~A6을 판단할 때 함께 보십시오.</p>
+</header>
+<div class="toolbar">
+  <div class="seg" role="group" aria-label="회차 고르기">
+    <button type="button" data-s="0" aria-pressed="true">전체</button>
+    <button type="button" data-s="1" aria-pressed="false">1회차</button>
+    <button type="button" data-s="2" aria-pressed="false">2회차</button>
+    <button type="button" data-s="3" aria-pressed="false">3회차</button>
+  </div>
+  <input type="search" id="q" placeholder="오개념 번호나 낱말로 찾기 (예: 27, 또는)" aria-label="찾기">
+  <div class="seg" role="group" aria-label="보기 방식">
+    <button type="button" id="vg" aria-pressed="true">그래프</button>
+    <button type="button" id="vt" aria-pressed="false">표</button>
+  </div>
+  <div class="legend" aria-hidden="true">
+    <span class="key"><span class="sw c"></span>개념</span>
+    <span class="key"><span class="sw"></span>오개념(크기: 보고한 문헌 수)</span>
+    <span class="key"><span class="sw j"></span>판정이 나올 수 있는 오개념</span>
+  </div>
+</div>
+<main>
+  <div id="graph" role="img" aria-label="개념과 오개념의 연결 그래프. 같은 내용을 표 보기에서 읽을 수 있습니다."></div>
+  <aside id="panel" aria-live="polite"></aside>
+</main>
+<section id="table" aria-label="개념과 오개념 표"></section>
+<footer>
+  전문가 검토용 자료입니다. 검토 밖의 용도로 옮기거나 나누어 주지 말아 주십시오. 개념 정의는 미래엔 중학교 『정보』 교과서의 해당 쪽 문장을 인용했고, ‘반복 속의 반복 구조’와 ‘반복 속의 선택 구조’의 정의는 교과서 설명을 바탕으로 연구자가 작성했습니다. 문항의 선택지와 정답은 싣지 않았습니다.
+</footer>
+<script src="cytoscape.min.js"></script>
+<script src="data.js"></script>
+<script>
+(function () {
+  const KG = window.KG;
+  const C = Object.fromEntries(KG.concepts.map(c => [c.id, c]));
+  const M = Object.fromEntries(KG.misconceptions.map(m => [m.id, m]));
+  const byConcept = {};
+  KG.misconceptions.forEach(m => (byConcept[m.concept] = byConcept[m.concept] || []).push(m));
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+
+  // preset layout: rows are sessions, three concepts per row, misconceptions on a ring
+  const W = 330, H = 285, els = [];
+  [1, 2, 3].forEach(k => els.push({ group: 'nodes', data: { id: 'S' + k, label: k + '회차', kind: 's', session: k }, position: { x: -175, y: (k - 1) * H } }));
+  KG.concepts.forEach((c, i) => {
+    const cx = (i % 3) * W, cy = Math.floor(i / 3) * H;
+    els.push({ group: 'nodes', data: { id: c.id, label: c.name, kind: 'c', session: c.session }, position: { x: cx, y: cy } });
+    const ms = byConcept[c.id] || [];
+    const r = ms.length > 4 ? 100 : 82;
+    ms.forEach((m, k) => {
+      const a = -Math.PI / 2 + (2 * Math.PI * k) / Math.max(ms.length, 1) + (ms.length === 1 ? Math.PI / 2 : 0);
+      els.push({ group: 'nodes', data: { id: m.id, label: String(m.no), kind: 'm', session: c.session, size: 26 + Math.min(m.freq, 11) * 1.5, judge: m.judgeable ? 1 : 0 },
+                 position: { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) } });
+      els.push({ group: 'edges', data: { id: c.id + '-' + m.id, source: c.id, target: m.id, session: c.session } });
+    });
+  });
+
+  const cy = cytoscape({
+    container: document.getElementById('graph'), elements: els, layout: { name: 'preset', padding: 40 },
+    minZoom: 0.3, maxZoom: 2.5, wheelSensitivity: 0.25, autoungrabify: true,
+    style: [
+      { selector: 'node[kind="c"]', style: { shape: 'round-rectangle', width: 'label', height: 34, padding: '12px', 'background-color': '#1f4e79',
+        label: 'data(label)', color: '#fff', 'font-size': 15, 'font-weight': 700, 'text-valign': 'center', 'text-halign': 'center' } },
+      { selector: 'node[kind="m"]', style: { width: 'data(size)', height: 'data(size)', 'background-color': '#f4d7c3', 'border-width': 1.5, 'border-color': '#b4561c',
+        label: 'data(label)', 'font-size': 12, color: '#4a2410', 'text-valign': 'center', 'text-halign': 'center' } },
+      { selector: 'node[kind="m"][judge = 1]', style: { 'border-width': 3.5, 'border-color': '#7a3410' } },
+      { selector: 'node[kind="s"]', style: { 'background-opacity': 0, label: 'data(label)', color: '#5b6673', 'font-size': 15, 'font-weight': 600, events: 'no' } },
+      { selector: 'edge', style: { width: 1.2, 'line-color': '#c3cad3', 'curve-style': 'straight' } },
+      { selector: '.dim', style: { opacity: 0.18 } },
+      { selector: '.hit', style: { 'overlay-color': '#2f7dd1', 'overlay-opacity': 0.25, 'overlay-padding': 6 } },
+      { selector: ':selected', style: { 'overlay-color': '#2f7dd1', 'overlay-opacity': 0.28, 'overlay-padding': 7 } },
+      { selector: '.hidden', style: { display: 'none' } }
+    ]
+  });
+
+  const panel = document.getElementById('panel');
+  function intro() {
+    panel.innerHTML = `<h2>읽는 방법</h2><p class="sub">지식그래프 ${esc(KG.meta.graph)}, ${esc(KG.meta.exported)} 내보냄</p>
+      <p>가로줄은 회차입니다(위에서부터 1·2·3회차). 가운데 남색 상자가 개념이고, 둘레의 원이 그 개념에 연결된 오개념입니다. 원 안의 숫자는 오개념 번호이며, 검토지의 ‘오개념-번호’와 같습니다.</p>
+      <p>테두리가 굵은 원은 지금 문항 구성에서 오개념 판정이 나올 수 있는 오개념(${KG.meta.judgeable}개)입니다. 나머지는 다른 오개념으로도 설명되는 선지에만 연결되어 판정에 쓰이지 않고, 피드백에서 생각을 짚는 데에만 쓰입니다.</p>`;
+  }
+  function itemsLine(list) { return list.length ? list.map(esc).join(', ') : '없음'; }
+  function showConcept(c) {
+    const ms = byConcept[c.id] || [];
+    panel.innerHTML = `<h2>${esc(c.name)}</h2><p class="sub">개념 ${esc(c.id)}, ${c.session}회차</p>
+      <dl><dt>개념 정의</dt><dd>${esc(c.definition)}</dd>
+      <dt>출처</dt><dd>${c.source === '교과서' ? '미래엔 교과서 ' + esc(c.pages) : '연구자 작성(교과서 ' + esc(c.pages) + ' 설명을 바탕으로)'}</dd>
+      <dt>재는 문항(기본, 동형 a, 동형 b)</dt><dd>${c.items.map(esc).join('<br>')}</dd>
+      <dt>연결된 오개념 ${ms.length}개</dt><dd><ul>${ms.map(m => `<li><button type="button" data-id="${m.id}">오개념-${m.no} ${esc(m.statement.replace(/^학습자는 /, '').slice(0, 38))}…</button></li>`).join('')}</ul></dd></dl>`;
+  }
+  function showMis(m) {
+    const c = C[m.concept];
+    panel.innerHTML = `<h2>오개념-${m.no}</h2><p class="sub">관련 개념: <button type="button" data-id="${c.id}" style="font:inherit;border:0;background:none;padding:0;color:#1f4e79;cursor:pointer">${esc(c.name)}</button>${m.label ? ` (원래 라벨: ${esc(m.label)})` : ''}</p>
+      <p><span class="tag ${m.judgeable ? 'on' : ''}">${m.judgeable ? '판정이 나올 수 있음' : '판정에 쓰이지 않음'}</span> <span class="tag">보고한 문헌 ${m.freq}편</span></p>
+      <dl><dt>오개념 진술</dt><dd>${esc(m.statement)}</dd>
+      <dt>학생에게 보이는 문장(피드백 카드 첫 문장에 쓰임)</dt><dd>“${esc(m.student)} 생각했나요?”</dd>
+      <dt>이 오개념으로 고르는 선지가 있는 문항</dt><dd>${itemsLine(m.items)}</dd></dl>`;
+  }
+  panel.addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (b) focusNode(b.dataset.id); });
+
+  function focusNode(id) {
+    const n = cy.getElementById(id); if (!n.nonempty()) return;
+    cy.elements().unselect(); n.select();
+    const hood = n.closedNeighborhood().union(n.closedNeighborhood().connectedNodes());
+    cy.elements().addClass('dim'); hood.removeClass('dim');
+    if (n.data('kind') === 'c') showConcept(C[id]); else showMis(M[id]);
+  }
+  cy.on('tap', 'node', e => focusNode(e.target.id()));
+  cy.on('tap', e => { if (e.target === cy) { cy.elements().removeClass('dim').unselect(); intro(); } });
+
+  // session filter
+  let session = 0;
+  document.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => {
+    session = +b.dataset.s;
+    document.querySelectorAll('[data-s]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    cy.elements().removeClass('hidden dim');
+    if (session) cy.elements().filter(el => el.data('session') !== session).addClass('hidden');
+    cy.fit(cy.elements(':visible'), 40); renderTable();
+  }));
+
+  // search
+  const q = document.getElementById('q');
+  q.addEventListener('input', () => {
+    const t = q.value.trim(); cy.elements().removeClass('hit');
+    if (!t) return;
+    const hits = KG.misconceptions.filter(m => String(m.no) === t || m.statement.includes(t) || m.student.includes(t));
+    hits.forEach(m => cy.getElementById(m.id).addClass('hit'));
+    KG.concepts.filter(c => c.name.includes(t)).forEach(c => cy.getElementById(c.id).addClass('hit'));
+    if (hits.length === 1) focusNode(hits[0].id);
+  });
+
+  // table view
+  const table = document.getElementById('table');
+  function renderTable() {
+    const cs = KG.concepts.filter(c => !session || c.session === session);
+    table.innerHTML = `<table><thead><tr><th>번호</th><th>오개념 진술</th><th>학생에게 보이는 문장</th><th>문헌 수</th><th>판정</th><th>관련 문항</th></tr></thead><tbody>` +
+      cs.map(c => `<tr class="cg"><td colspan="6">${esc(c.id)} ${esc(c.name)}: ${esc(c.definition)} (${c.source === '교과서' ? '교과서 ' : '연구자 작성, 교과서 '}${esc(c.pages)})</td></tr>` +
+        (byConcept[c.id] || []).map(m => `<tr><td>오개념-${m.no}</td><td>${esc(m.statement)}</td><td>${esc(m.student)}</td><td>${m.freq}</td><td>${m.judgeable ? '나올 수 있음' : '쓰이지 않음'}</td><td>${itemsLine(m.items)}</td></tr>`).join('')).join('') +
+      `</tbody></table>`;
+  }
+  const vg = document.getElementById('vg'), vt = document.getElementById('vt');
+  vg.addEventListener('click', () => { document.body.classList.remove('tableview'); vg.setAttribute('aria-pressed', 'true'); vt.setAttribute('aria-pressed', 'false'); cy.resize(); cy.fit(cy.elements(':visible'), 40); });
+  vt.addEventListener('click', () => { document.body.classList.add('tableview'); vt.setAttribute('aria-pressed', 'true'); vg.setAttribute('aria-pressed', 'false'); });
+
+  intro(); renderTable(); cy.fit(40);
+  const h = decodeURIComponent(location.hash.slice(1)); if (h && (C[h] || M[h])) focusNode(h);
+})();
+</script>
+</body>
+</html>
