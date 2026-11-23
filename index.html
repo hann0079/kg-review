@@ -117,7 +117,8 @@
   const KG = window.KG;
   // 관련 개념 '리스트': 따로 재는 문항은 없고, 리스트의 데이터 삭제 문항의 선지(오개념-90)로 연결됨
   KG.concepts.splice(1, 0, { id: 'CL', name: '리스트', session: 1, definition: '여러 개의 데이터를 순차적으로 저장한다.', pages: '102쪽', source: '교과서', items: [], related: true });
-  KG.misconceptions.forEach(m => { if (m.no === 90) m.concept = 'CL'; });
+  // 오개념-101(조건식의 값이 출력된다고 믿음)은 같은 성격의 오개념-52처럼 선택 구조에 연결(선지는 비교 연산 문항에 있음)
+  KG.misconceptions.forEach(m => { if (m.no === 90) m.concept = 'CL'; if (m.no === 101) m.concept = 'C6'; });
   // 성취기준 대응(검토지 '가. 평가 문항'과 같음)과 같은 회차 안의 개념 간 선수 관계
   const STD = [
     { id: 'SD5', code: '[9정03-05]', text: '데이터를 순차적으로 저장할 수 있는 구조를 활용하여 문제 해결 프로그램을 작성한다.', concepts: ['C1', 'CL', 'C2'] },
@@ -221,13 +222,18 @@
       <dt>재는 문항(기본, 동형 a, 동형 b)</dt><dd>${c.related ? '따로 재는 문항은 없습니다. 리스트의 데이터 삭제 문항(01-04·01-08·01-12)의 선지에 이 개념의 오개념이 연결되어 있습니다.' : c.items.map(esc).join('<br>')}</dd>
       <dt>연결된 오개념 ${ms.length}개</dt><dd><ul>${ms.map(m => `<li><button type="button" data-id="${m.id}">오개념-${m.no} ${esc(m.statement.replace(/^학습자는 /, '').slice(0, 38))}…</button></li>`).join('')}</ul></dd></dl>`;
   }
+  function otherUnit(m, c) {
+    if (!m.items.length || c.items.some(t => m.items.some(i => t.includes(i)))) return '';
+    const o = KG.concepts.find(k => k.items.some(t => m.items.some(i => t.includes(i))));
+    return o ? o.name : '';
+  }
   function showMis(m) {
     const c = C[m.concept];
     panel.innerHTML = `<h2>오개념-${m.no}</h2><p class="sub">관련 개념: <button type="button" data-id="${c.id}" class="lk">${esc(c.name)}</button></p>
       <p><span class="tag ${m.judgeable ? 'on' : ''}">${m.judgeable ? '판정할 수 있음' : '판정에 쓰지 않음'}</span> <span class="tag">보고한 문헌 ${m.freq}편</span></p>
       <dl><dt>오개념 진술</dt><dd>${esc(m.statement)}</dd>
       <dt>학생에게 보이는 문장(피드백 카드 첫 문장에 쓰임)</dt><dd>“${esc(m.student)} 생각했나요?”</dd>
-      <dt>이 오개념을 고르는 선지가 있는 문항</dt><dd>${itemsLine(m.items)}</dd></dl>`;
+      <dt>이 오개념을 고르는 선지가 있는 문항</dt><dd>${itemsLine(m.items)}${otherUnit(m, c) ? `<br><span class="sub">선지는 ‘${esc(otherUnit(m, c))}’ 문항에 있습니다.</span>` : ''}</dd></dl>`;
   }
   function showStd(s) {
     panel.innerHTML = `<h2>${esc(s.code)}</h2><p class="sub">2022 개정 교육과정 중학교 정보 성취기준</p>
