@@ -32,8 +32,6 @@
   .key { display: inline-flex; align-items: center; gap: 6px; }
   .sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--mis); border: 1.5px solid var(--mis-line); }
   .sw.c { border-radius: 4px; background: var(--concept); border-color: var(--concept); width: 18px; }
-  .sw.j { border: 3px solid var(--judge); }
-  .sw.r { border-radius: 4px; background: #fff; border: 2px dashed var(--concept); width: 18px; }
   .sw.s { border-radius: 4px; background: #eef3f8; border-color: #8fa6bf; width: 22px; }
   .ar { color: var(--concept); font-weight: 700; }
   .legend[hidden] { display: none; }
@@ -52,7 +50,6 @@
   aside li button { font: inherit; text-align: left; border: 0; background: none; padding: 3px 0; color: var(--concept); cursor: pointer; }
   aside li button:hover { text-decoration: underline; }
   .tag { display: inline-block; font-size: 12.5px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
-  .tag.on { border-color: var(--judge); color: var(--judge); }
   #table { display: none; padding: 16px 24px 32px; overflow: auto; }
   table { border-collapse: collapse; width: 100%; font-size: 14px; }
   th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
@@ -71,7 +68,7 @@
 <body>
 <header>
   <h1>지식그래프 보기</h1>
-  <p class="lede">평가 문항이 재는 개념 9개와 관련 개념 ‘리스트’, 문항의 오답 선지에 연결된 오개념 45개, 개념 간 선수 관계와 성취기준 대응을 보여 줍니다. 검토지 ‘다. 시스템’의 A1~A6을 평정하실 때 함께 보시면 됩니다.</p>
+  <p class="lede">평가 문항이 재는 개념 9개와 ‘리스트’, 문항의 오답 선지에 연결된 오개념 45개, 개념 간 선수 관계와 성취기준 대응을 보여 줍니다. 검토지 ‘다. 시스템’의 A1~A6을 평정하실 때 함께 보시면 됩니다.</p>
 </header>
 <div class="toolbar">
   <div class="seg" role="group" aria-label="회차 고르기">
@@ -92,14 +89,12 @@
   <div class="legend" id="legend-mis" aria-hidden="true">
     <span class="key"><span class="sw c"></span>개념</span>
     <span class="key"><span class="sw"></span>오개념(크기: 보고한 문헌 수)</span>
-    <span class="key"><span class="sw j"></span>판정할 수 있는 오개념</span>
-    <span class="key"><span class="sw r"></span>관련 개념(따로 재는 문항 없음)</span>
   </div>
   <div class="legend" id="legend-rel" aria-hidden="true" hidden>
     <span class="key"><span class="sw s"></span>성취기준</span>
     <span class="key"><span class="sw c"></span>개념</span>
-    <span class="key"><span class="sw r"></span>관련 개념</span>
     <span class="key"><span class="ar">→</span>선수 관계(먼저 알아야 하는 개념 → 다음 개념)</span>
+    <span class="key"><span class="ar">⇢</span>회차를 잇는 선수 관계(점선)</span>
   </div>
 </div>
 <main>
@@ -108,7 +103,7 @@
 </main>
 <section id="table" aria-label="개념과 오개념 표"></section>
 <footer>
-  전문가 검토를 위한 자료이니 다른 곳에 옮기거나 나누어 주지 말아 주십시오. 개념 정의는 미래엔 중학교 『정보』 교과서의 해당 쪽 문장이며, ‘반복 속의 반복 구조’와 ‘반복 속의 선택 구조’는 교과서 설명을 바탕으로 정리했습니다. 문항의 선택지와 정답은 싣지 않았습니다.
+  개념 정의는 미래엔 중학교 『정보』 교과서의 해당 쪽 문장이며, ‘반복 속의 반복 구조’와 ‘반복 속의 선택 구조’는 교과서 설명을 바탕으로 정리했습니다.
 </footer>
 <script src="cytoscape.min.js"></script>
 <script src="data.js"></script>
@@ -116,10 +111,10 @@
 (function () {
   const KG = window.KG;
   // 관련 개념 '리스트': 따로 재는 문항은 없고, 리스트의 데이터 삭제 문항의 선지(오개념-90)로 연결됨
-  KG.concepts.splice(1, 0, { id: 'CL', name: '리스트', session: 1, definition: '여러 개의 데이터를 순차적으로 저장한다.', pages: '102쪽', source: '교과서', items: [], related: true });
+  KG.concepts.splice(1, 0, { id: 'CL', name: '리스트', session: 1, definition: '하나의 이름으로 여러 개의 데이터를 저장할 수 있는 구조를 말한다.', pages: '102쪽, 139쪽', source: '교과서', items: [], related: true });
   // 오개념-101(조건식의 값이 출력된다고 믿음)은 같은 성격의 오개념-52처럼 선택 구조에 연결(선지는 비교 연산 문항에 있음)
   KG.misconceptions.forEach(m => { if (m.no === 90) m.concept = 'CL'; if (m.no === 101) m.concept = 'C6'; });
-  // 성취기준 대응(검토지 '가. 평가 문항'과 같음)과 같은 회차 안의 개념 간 선수 관계
+  // 성취기준 대응(검토지 '가. 평가 문항'과 같음)과 개념 간 선수 관계(같은 회차 안, 회차를 잇는 제어 구조 순서)
   const STD = [
     { id: 'SD5', code: '[9정03-05]', text: '데이터를 순차적으로 저장할 수 있는 구조를 활용하여 문제 해결 프로그램을 작성한다.', concepts: ['C1', 'CL', 'C2'] },
     { id: 'SD6', code: '[9정03-06]', text: '논리 연산과 중첩 제어 구조를 활용하여 문제를 해결하는 프로그램을 작성한다.', concepts: ['C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9'] }
@@ -130,8 +125,11 @@
     { id: 'P2', from: 'C4', to: 'C5', session: 2, reason: "논리 연산 문항은 '그리고'·'또는'의 양쪽에 비교 블록이 들어가므로, 비교 결과(참·거짓)를 알아야 논리 연산의 결과를 구할 수 있습니다(108~109쪽)." },
     { id: 'P3', from: 'C4', to: 'C6', session: 2, reason: "선택 구조 문항의 '만일' 조건은 모두 비교 블록이므로, 비교 결과(참·거짓)를 알아야 실행할 블록을 고를 수 있습니다(108·110쪽)." },
     { id: 'P4', from: 'C7', to: 'C8', session: 3, reason: '안쪽·바깥쪽 반복 모두 반복 구조이므로, 반복 블록의 범위와 횟수를 알아야 중첩 반복의 실행 횟수를 셀 수 있습니다(112~113쪽).' },
-    { id: 'P5', from: 'C7', to: 'C9', session: 3, reason: "반복할 때마다 바뀌는 값으로 안쪽의 '만일' 조건을 다시 확인하므로, 반복 구조(범위·값 바꾸기)를 먼저 알아야 합니다(113~114쪽)." }
+    { id: 'P5', from: 'C7', to: 'C9', session: 3, reason: "반복할 때마다 바뀌는 값으로 안쪽의 '만일' 조건을 다시 확인하므로, 반복 구조(범위·값 바꾸기)를 먼저 알아야 합니다(113~114쪽)." },
+    { id: 'P7', from: 'C3', to: 'C6', cross: true, reason: "선택 구조 문항은 '만일' 블록의 앞뒤 블록이 위에서부터 차례로 실행되고, 조건에 맞는 쪽의 블록도 차례로 실행되므로 순차 구조를 먼저 알아야 합니다. 교과서도 순차 구조를 프로그램의 가장 기본적인 구조로 설명합니다(교사용 교과서 112쪽)." },
+    { id: 'P8', from: 'C6', to: 'C7', cross: true, reason: "제어 구조를 회차 순서대로 배우도록 짰습니다(2회차 선택 구조, 3회차 반복 구조). 반복을 멈추는 조건(‘~이 될 때까지 반복하기’)과 3회차의 반복 속의 선택 구조는 조건 판단을 바탕으로 하므로 선택 구조를 먼저 배웁니다(112~114쪽)." }
   ];
+  const sessLabel = p => p.cross ? C[p.from].session + '회차 → ' + C[p.to].session + '회차' : p.session + '회차';
   const C = Object.fromEntries(KG.concepts.map(c => [c.id, c]));
   const M = Object.fromEntries(KG.misconceptions.map(m => [m.id, m]));
   const S = Object.fromEntries(STD.map(s => [s.id, s]));
@@ -153,19 +151,19 @@
     const r = ms.length > 4 ? 100 : 82;
     ms.forEach((m, k) => {
       const a = -Math.PI / 2 + (2 * Math.PI * k) / Math.max(ms.length, 1) + (ms.length === 1 ? Math.PI : 0);
-      elsMis.push({ group: 'nodes', data: { id: m.id, label: String(m.no), kind: 'm', session: c.session, size: 26 + Math.min(m.freq, 11) * 1.5, judge: m.judgeable ? 1 : 0 },
+      elsMis.push({ group: 'nodes', data: { id: m.id, label: String(m.no), kind: 'm', session: c.session, size: 26 + Math.min(m.freq, 11) * 1.5 },
                     position: { x: cx + r * Math.cos(a), y: cy0 + r * Math.sin(a) } });
       elsMis.push({ group: 'edges', data: { id: c.id + '-' + m.id, source: c.id, target: m.id, session: c.session, kind: 'cm' } });
     });
   });
 
   // 보기 2: 선수 관계와 성취기준(성취기준 상자 안에 개념, 화살표는 먼저 알아야 하는 개념 → 다음 개념)
-  const POS = { C1: [0, 0], CL: [190, 0], C2: [400, 0], C3: [780, 0], C4: [700, 190], C5: [970, 130], C6: [970, 250], C7: [700, 400], C8: [990, 340], C9: [990, 460] };
+  const POS = { C1: [0, 0], CL: [190, 0], C2: [400, 0], C3: [1100, 0], C4: [700, 190], C5: [930, 130], C6: [970, 250], C7: [700, 400], C8: [990, 340], C9: [990, 460] };
   const elsRel = [];
   [1, 2, 3].forEach(k => elsRel.push({ group: 'nodes', data: { id: 'R' + k, label: k + '회차', kind: 's', session: k }, position: { x: -190, y: [0, 190, 400][k - 1] } }));
   STD.forEach(s => elsRel.push({ group: 'nodes', data: { id: s.id, label: s.code, kind: 'std' } }));
   KG.concepts.forEach(c => elsRel.push({ group: 'nodes', data: { id: c.id, label: c.name, kind: 'c', session: c.session, rel: c.related ? 1 : 0, parent: stdOf(c.id).id }, position: { x: POS[c.id][0], y: POS[c.id][1] } }));
-  PRE.forEach(p => elsRel.push({ group: 'edges', data: { id: p.id, source: p.from, target: p.to, session: p.session, kind: 'pre' } }));
+  PRE.forEach(p => elsRel.push({ group: 'edges', data: Object.assign({ id: p.id, source: p.from, target: p.to, kind: 'pre', cross: p.cross ? 1 : 0 }, p.cross ? {} : { session: p.session }) }));
 
   const cy = cytoscape({
     container: document.getElementById('graph'), elements: elsMis, layout: { name: 'preset', padding: 40 },
@@ -173,15 +171,14 @@
     style: [
       { selector: 'node[kind="c"]', style: { shape: 'round-rectangle', width: 'label', height: 34, padding: '12px', 'background-color': '#1f4e79',
         label: 'data(label)', color: '#fff', 'font-size': 15, 'font-weight': 700, 'text-valign': 'center', 'text-halign': 'center' } },
-      { selector: 'node[kind="c"][rel = 1]', style: { 'background-color': '#ffffff', 'border-width': 2, 'border-color': '#1f4e79', 'border-style': 'dashed', color: '#1f4e79' } },
       { selector: 'node[kind="m"]', style: { width: 'data(size)', height: 'data(size)', 'background-color': '#f4d7c3', 'border-width': 1.5, 'border-color': '#b4561c',
         label: 'data(label)', 'font-size': 12, color: '#4a2410', 'text-valign': 'center', 'text-halign': 'center' } },
-      { selector: 'node[kind="m"][judge = 1]', style: { 'border-width': 3.5, 'border-color': '#7a3410' } },
       { selector: 'node[kind="s"]', style: { 'background-opacity': 0, label: 'data(label)', color: '#5b6673', 'font-size': 15, 'font-weight': 600, events: 'no' } },
       { selector: 'node[kind="std"]', style: { shape: 'round-rectangle', 'background-color': '#eef3f8', 'border-width': 1.5, 'border-color': '#8fa6bf', padding: '28px',
         label: 'data(label)', 'text-valign': 'top', 'text-halign': 'center', 'text-margin-y': -6, color: '#1f4e79', 'font-size': 15, 'font-weight': 700 } },
       { selector: 'edge', style: { width: 1.2, 'line-color': '#c3cad3', 'curve-style': 'straight' } },
       { selector: 'edge[kind="pre"]', style: { width: 2.5, 'line-color': '#1f4e79', 'target-arrow-color': '#1f4e79', 'target-arrow-shape': 'triangle', 'arrow-scale': 1.3, 'curve-style': 'bezier' } },
+      { selector: 'edge[kind="pre"][cross = 1]', style: { 'line-style': 'dashed', 'line-dash-pattern': [8, 5] } },
       { selector: '.dim', style: { opacity: 0.18 } },
       { selector: '.hit', style: { 'overlay-color': '#2f7dd1', 'overlay-opacity': 0.25, 'overlay-padding': 6 } },
       { selector: ':selected', style: { 'overlay-color': '#2f7dd1', 'overlay-opacity': 0.28, 'overlay-padding': 7 } },
@@ -196,13 +193,12 @@
       panel.innerHTML = `<h2>보는 방법</h2>
         <p>가로줄은 회차입니다. 위에서부터 1회차, 2회차, 3회차입니다.</p>
         <p>남색 상자는 개념이고, 상자 둘레의 원은 그 개념에 연결된 오개념입니다. 원 안의 숫자는 오개념 번호로, 검토지의 ‘오개념-27’ 같은 번호와 같습니다. 원이 클수록 그 오개념을 보고한 선행연구가 많습니다.</p>
-        <p>테두리가 굵은 원(${KG.meta.judgeable}개)은 학생 응답으로 판정할 수 있는 오개념입니다. 테두리가 얇은 원은 다른 오개념으로도 설명되는 선지에만 연결되어 있어 판정에는 쓰지 않고, 피드백에서 학생의 생각을 짚을 때만 씁니다.</p>
-        <p>점선 상자 ‘리스트’는 따로 재는 문항이 없는 관련 개념으로, 리스트의 데이터 삭제 문항의 선지에 연결된 오개념이 있습니다.</p>
         <p>개념이나 오개념을 누르면 이 자리에 자세한 내용이 나옵니다. 빈 곳을 누르면 이 안내로 돌아옵니다. 위의 ‘선수 관계·성취기준’을 누르면 개념끼리의 관계를 볼 수 있습니다.</p>`;
     } else {
       panel.innerHTML = `<h2>보는 방법</h2>
         <p>큰 상자는 성취기준이고, 그 안의 남색 상자는 그 성취기준에 대응하는 개념입니다. 가로줄은 회차입니다.</p>
-        <p>화살표는 같은 회차 안의 선수 관계입니다. 화살표가 시작하는 개념을 먼저 알아야 화살표가 가리키는 개념의 문항을 풀 수 있다는 뜻입니다(${PRE.length}개).</p>
+        <p>화살표는 선수 관계입니다(${PRE.length}개). 실선은 같은 회차 안의 관계로, 화살표가 시작하는 개념을 먼저 알아야 화살표가 가리키는 개념의 문항을 풀 수 있다는 뜻입니다.</p>
+        <p>점선은 회차를 잇는 관계로, 제어 구조를 순차 구조, 선택 구조, 반복 구조의 순서로 배운다는 뜻입니다.</p>
         <p>성취기준, 개념, 화살표를 누르면 이 자리에 내용과 근거가 나옵니다.</p>`;
     }
   }
@@ -213,7 +209,7 @@
   }
   function showConcept(c) {
     const ms = byConcept[c.id] || [], s = stdOf(c.id);
-    panel.innerHTML = `<h2>${esc(c.name)}</h2><p class="sub">${c.related ? '관련 개념' : '개념 ' + esc(c.id)}, ${c.session}회차</p>
+    panel.innerHTML = `<h2>${esc(c.name)}</h2><p class="sub">${c.related ? '개념' : '개념 ' + esc(c.id)}, ${c.session}회차</p>
       <dl><dt>개념 정의</dt><dd>${esc(c.definition)}</dd>
       <dt>출처</dt><dd>${srcText(c)}</dd>
       <dt>성취기준</dt><dd><button type="button" data-id="${s.id}" class="lk">${esc(s.code)}</button> ${esc(s.text)}</dd>
@@ -230,7 +226,7 @@
   function showMis(m) {
     const c = C[m.concept];
     panel.innerHTML = `<h2>오개념-${m.no}</h2><p class="sub">관련 개념: <button type="button" data-id="${c.id}" class="lk">${esc(c.name)}</button></p>
-      <p><span class="tag ${m.judgeable ? 'on' : ''}">${m.judgeable ? '판정할 수 있음' : '판정에 쓰지 않음'}</span> <span class="tag">보고한 문헌 ${m.freq}편</span></p>
+      <p><span class="tag">보고한 문헌 ${m.freq}편</span></p>
       <dl><dt>오개념 진술</dt><dd>${esc(m.statement)}</dd>
       <dt>학생에게 보이는 문장(피드백 카드 첫 문장에 쓰임)</dt><dd>“${esc(m.student)} 생각했나요?”</dd>
       <dt>이 오개념을 고르는 선지가 있는 문항</dt><dd>${itemsLine(m.items)}${otherUnit(m, c) ? `<br><span class="sub">선지는 ‘${esc(otherUnit(m, c))}’ 문항에 있습니다.</span>` : ''}</dd></dl>`;
@@ -241,8 +237,8 @@
       <dl><dt>대응하는 개념 ${s.concepts.length}개</dt><dd><ul>${s.concepts.map(id => `<li><button type="button" data-id="${id}">${esc(C[id].name)} (${C[id].session}회차)</button></li>`).join('')}</ul></dd></dl>`;
   }
   function showPre(p) {
-    panel.innerHTML = `<h2>${esc(C[p.from].name)} → ${esc(C[p.to].name)}</h2><p class="sub">선수 관계, ${p.session}회차</p>
-      <dl><dt>뜻</dt><dd>‘${esc(C[p.from].name)}’을(를) 먼저 알아야 ‘${esc(C[p.to].name)}’ 문항을 풀 수 있습니다.</dd>
+    panel.innerHTML = `<h2>${esc(C[p.from].name)} → ${esc(C[p.to].name)}</h2><p class="sub">선수 관계, ${sessLabel(p)}</p>
+      <dl><dt>뜻</dt><dd>${p.cross ? `‘${esc(C[p.from].name)}’을(를) 앞 회차에서 먼저 배운 뒤 ‘${esc(C[p.to].name)}’을(를) 배웁니다.` : `‘${esc(C[p.from].name)}’을(를) 먼저 알아야 ‘${esc(C[p.to].name)}’ 문항을 풀 수 있습니다.`}</dd>
       <dt>근거</dt><dd>${esc(p.reason)}</dd>
       <dt>개념</dt><dd><ul><li><button type="button" data-id="${p.from}">${esc(C[p.from].name)}</button></li><li><button type="button" data-id="${p.to}">${esc(C[p.to].name)}</button></li></ul></dd></dl>`;
   }
@@ -276,6 +272,7 @@
   function applySession() {
     cy.elements().removeClass('hidden dim');
     if (session) cy.elements().filter(el => el.data('session') !== undefined && el.data('session') !== session).addClass('hidden');
+    cy.edges().filter(e => e.source().hasClass('hidden') || e.target().hasClass('hidden')).addClass('hidden');
     cy.fit(cy.elements(':visible'), 40);
   }
   function setMode(m) {
@@ -311,17 +308,17 @@
   const table = document.getElementById('table');
   function renderTable() {
     const cs = KG.concepts.filter(c => !session || c.session === session);
-    const ps = PRE.filter(p => !session || p.session === session);
+    const ps = PRE.filter(p => !session || (p.cross ? C[p.from].session === session || C[p.to].session === session : p.session === session));
     table.innerHTML =
       `<h2>성취기준과 개념</h2><table><thead><tr><th>성취기준</th><th>내용</th><th>대응하는 개념</th></tr></thead><tbody>` +
       STD.map(s => `<tr><td>${esc(s.code)}</td><td>${esc(s.text)}</td><td>${s.concepts.filter(id => !session || C[id].session === session).map(id => esc(C[id].name)).join(', ') || '-'}</td></tr>`).join('') +
       `</tbody></table>` +
       `<h2>개념 간 선수 관계</h2><table><thead><tr><th>먼저 알아야 하는 개념</th><th>다음 개념</th><th>회차</th><th>근거</th></tr></thead><tbody>` +
-      (ps.map(p => `<tr><td>${esc(C[p.from].name)}</td><td>${esc(C[p.to].name)}</td><td>${p.session}</td><td>${esc(p.reason)}</td></tr>`).join('') || '<tr><td colspan="4">이 회차에는 선수 관계가 없습니다.</td></tr>') +
+      (ps.map(p => `<tr><td>${esc(C[p.from].name)}</td><td>${esc(C[p.to].name)}</td><td>${sessLabel(p)}</td><td>${esc(p.reason)}</td></tr>`).join('') || '<tr><td colspan="4">이 회차에는 선수 관계가 없습니다.</td></tr>') +
       `</tbody></table>` +
-      `<h2>개념과 오개념</h2><table><thead><tr><th>번호</th><th>오개념 진술</th><th>학생에게 보이는 문장</th><th>문헌 수</th><th>판정</th><th>관련 문항</th></tr></thead><tbody>` +
-      cs.map(c => `<tr class="cg"><td colspan="6">${esc(c.id)} ${esc(c.name)}: ${esc(c.definition)} (${srcText(c)})</td></tr>` +
-        (byConcept[c.id] || []).map(m => `<tr><td>오개념-${m.no}</td><td>${esc(m.statement)}</td><td>${esc(m.student)}</td><td>${m.freq}</td><td>${m.judgeable ? '판정할 수 있음' : '판정에 쓰지 않음'}</td><td>${itemsLine(m.items)}</td></tr>`).join('')).join('') +
+      `<h2>개념과 오개념</h2><table><thead><tr><th>번호</th><th>오개념 진술</th><th>학생에게 보이는 문장</th><th>문헌 수</th><th>관련 문항</th></tr></thead><tbody>` +
+      cs.map(c => `<tr class="cg"><td colspan="5">${esc(c.id)} ${esc(c.name)}: ${esc(c.definition)} (${srcText(c)})</td></tr>` +
+        (byConcept[c.id] || []).map(m => `<tr><td>오개념-${m.no}</td><td>${esc(m.statement)}</td><td>${esc(m.student)}</td><td>${m.freq}</td><td>${itemsLine(m.items)}</td></tr>`).join('')).join('') +
       `</tbody></table>`;
   }
   const vg = document.getElementById('vg'), vt = document.getElementById('vt');
